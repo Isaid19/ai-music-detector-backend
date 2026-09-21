@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  ai-music-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-music-detector:latest
+    container_name: ai-music-detector
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MAX_FILE_BYTES=104857600
+      - ANALYSIS_SEGMENT_SECONDS=60
+      - ANALYSIS_HOP_SECONDS=30
+      - SHAZAM_TIMEOUT=45
+      - YOUTUBE_SEARCH_TIMEOUT=20
+    volumes:
+      - ai_music_uploads:/tmp/ai_music_uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  ai_music_uploads:
